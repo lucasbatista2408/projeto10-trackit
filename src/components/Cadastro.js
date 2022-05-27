@@ -3,6 +3,7 @@ import Logo from "../assets/Group 8.png"
 import {useNavigate} from "react-router-dom"
 import React, {useState} from "react"
 import axios from "axios"
+import PopUp from "./PopUp.js"
 
 function Cadastro(){
 
@@ -12,11 +13,13 @@ function Cadastro(){
     name: '',
     image: ''
   })
+  const [popup, setPopup] = useState(false)
 
   const navigate = useNavigate();
 
   function SignUp(e){
     e.preventDefault();
+    setPopup(true)
 
     const URL = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/auth/sign-up"
     const signUp = form;
@@ -26,9 +29,12 @@ function Cadastro(){
       console.log(res.data)
       navigate('/')
     })
-    .catch(error => {
-      console.log(error)
-    })
+    .catch(error => 
+      (console.log(error),
+      alert("Revise as informações digitadas"),
+      setPopup(false),
+      window.location.reload(true)
+      ))
   }
 
 
@@ -36,18 +42,20 @@ function Cadastro(){
     navigate('/')
   }
 
-  return(
-    <SignIn>
-      <img src={Logo} alt="Logo"/>
-      <Form>
-        <input type="text" placeholder="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
-        <input type="text" placeholder="senha" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required/>
-        <input type="text" placeholder="nome"  value={form.name} onChange={e => setForm({...form, name: e.target.value})} required/>
-        <input type="text" placeholder="foto"  value={form.image} onChange={e => setForm({...form, image: e.target.value})} required/>
-        <button onClick={SignUp}>Cadastrar</button>
-      </Form>
-      <Button onClick={HandleLogIn}>Não tem uma conta? Cadastre-se</Button>
-    </SignIn>
+  return  ( popup === false ?
+  <SignIn>
+    <img src={Logo} alt="Logo"/>
+    <Form>
+      <input type="text" placeholder="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+      <input type="text" placeholder="senha" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required/>
+      <input type="text" placeholder="nome"  value={form.name} onChange={e => setForm({...form, name: e.target.value})} required/>
+      <input type="text" placeholder="foto"  value={form.image} onChange={e => setForm({...form, image: e.target.value})} required/>
+      <button onClick={SignUp}>Cadastrar</button>
+    </Form>
+    <Button onClick={HandleLogIn}>Não tem uma conta? Cadastre-se</Button>
+</SignIn>
+  :
+  <PopUp />
   )
 }
 
@@ -55,7 +63,7 @@ const SignIn = styled.div`
   min-width: 375px;
   width: 100%;
   min-height: 665px;
-  height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;

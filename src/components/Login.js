@@ -3,35 +3,49 @@ import React, {useState} from "react"
 import Logo from "../assets/Group 8.png"
 import {useNavigate} from "react-router-dom"
 import axios from "axios"
+import PopUpLogin from "./PopUpLogin.js"
+import { useContext } from "react";
+import UserContext from "../contexts/UserContext";
 
 export default function Login(){
 
-  const[token, setToken] = useState('')
+  const { info, setInfo } = useContext(UserContext);
+
   const[form, setForm] = useState({
     email: '',
     password: ''
   })
+  const [popup, setPopup] = useState(false)
 
   const navigate = useNavigate();
 
   function HandleLogIn(e){
     e.preventDefault();
+    setPopup(true)
     const URL = "https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/auth/login"
     const infoLogIn = form;
     const promise = axios.post(URL, infoLogIn)
     promise.then(res => { 
-      setToken(res.data.token)
-      console.log(token)
+      const dados = res.data;
+      setInfo(dados)
+      console.log(res.data)
+      console.log(info)
       navigate('/hoje')}
       )
-    promise.catch(error => (console.log(error)))
+
+    promise.catch(error => (
+      console.log(error),
+      alert("As informações digitadas estão incorretas"),
+      setPopup(false),
+      window.location.reload(true)
+      ))
   }
 
   function HandleClick(){
     navigate("/cadastro")
   }
 
-  return(
+  return( popup === false ?
     <LoginPage>
       <img src={Logo} alt="Logo"/>
       <Form>
@@ -40,7 +54,7 @@ export default function Login(){
         <button onClick={HandleLogIn} type="submit" >entrar</button>
       </Form>
         <Button onClick={HandleClick}>Não tem uma conta? Cadastre-se</Button>
-    </LoginPage>
+    </LoginPage> : <PopUpLogin />
   )
 }
 
@@ -48,7 +62,7 @@ const LoginPage = styled.div`
   min-width: 375px;
   width: 100%;
   min-height: 665px;
-  height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
