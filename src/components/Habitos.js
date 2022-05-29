@@ -14,10 +14,19 @@ export default function Habitos(){
   const [newHabit, setNewHabbit] = useState('') // CRIAR HABITO NOVO
   const [add, setAdd] = useState(false); // ABRIR TELA DE CRIAÇÃO DE HABITO NOVO
   const [sDay, setSDay] = useState([])
-  const [status, setStatus] = useState(true)
+
+  const name = newHabit;
+  const days = sDay;
+  
+  console.log(days)
+  console.log(sDay)
+  console.log(list)
+  console.log(newHabit)
+  console.log(name)
 
   const buttons = [{name: 'D'}, {name: 'S'}, {name: 'T'},{name: 'Q'}, {name: 'Q'}, {name: 'S'}, {name: 'S'}]
 
+  // ABRIR E FECHAR JANELA DE HABITOS
   function HandleAdd(){
     add === false ? setAdd(true) : setAdd(false)
   }
@@ -25,13 +34,52 @@ export default function Habitos(){
   function HandleCancel(){
     setAdd(false)
   }
+  ///////////////////////////////////////////////////
 
-  function HandleActive(index){
-    const array = [...sDay, index ]
-    setSDay(array)
-    console.log(sDay)
+  // AXIOS POST
+  function HandlePost(){
+    const token = info.token;
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}` //Padrão da API (Bearer Authentication)
+      }
+    }
+
+    const name = newHabit;
+    const days = sDay;
+
+    const body ={
+      name: name,
+      days: days
+    }
+
+    const promise = axios.post("https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits", body, config)
+    promise.then(res => {
+      setList(res.data)
+      console.log(res.data)
+      console.log(list)
+    })
   }
+  ///////////////////////////////////////////////////
 
+  // SELECIONAR DIAS DA SEMANA PROS HABITOS
+  function HandleActive(e, index){
+    const array = sDay.some((day) => day === index);
+    if (!array) {
+      e.target.style.background = '#CFCFCF'
+      e.target.style.color = 'white'
+      setSDay([...sDay, index]);
+    } else {
+      const arrayN = sDay.filter((day) => day !== index);
+      e.target.style.background = 'transparent';
+      e.target.style.color ='#D4D4D4';
+      setSDay(arrayN);
+    }
+  }
+  //////////////////////////////////////////////////
+
+  // AXIOS REQUEST
   useEffect(() => {
     axiosRequest()
   }, [])
@@ -46,9 +94,9 @@ export default function Habitos(){
     const promise = axios.get("https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits", config)
     promise.then(res => {
       setList(res.data)
-      console.log(list)
     })
   }
+  /////////////////////////////////////////
 
 
   return(
@@ -64,15 +112,28 @@ export default function Habitos(){
               <AddHabit>
                 <input type="text" placeholder={"nome do hábito"} onChange={e => setNewHabbit(e.target.value)} required/>
                 <WeekButton>
-                    {buttons.map((day, index) => <button id={index} onClick={() => {HandleActive(index)}}>{day.name}</button>)}
+                  {buttons.map((day, index) =><button id={index} onClick={(e) => {HandleActive(e, index)}}>{day.name}</button>)}
                 </WeekButton>
                 <SaveCancel>
                   <Cancel onClick={HandleCancel}>Cancelar</Cancel>
-                  <Save>Salvar</Save>
+                  <Save onClick={HandlePost}>Salvar</Save>
                 </SaveCancel>
               </AddHabit>}
             <HabitsList>
-                <h1>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</h1>
+              {(list.length) === 0 ? <h1>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</h1> : list.map((value) => {
+                const {id, name, days} = value;
+                console.log(days)
+                return(
+                <HabitCard>
+                  <HabitsInfo>
+                  <h1>{name}</h1>
+                    <WeekButtonList>
+                      {buttons.map((day, index) =><button selected={days.some(item => item === index)} key={index} disabled>{day.name}</button>)}
+                    </WeekButtonList>
+                  </HabitsInfo> 
+                  <ion-icon name="trash-outline"></ion-icon>
+                </HabitCard>
+                )})}
             </HabitsList>
         </Habits>
       </Container>
@@ -186,4 +247,50 @@ const Save = styled.button`
 
 const HabitsList = styled.div`
 
+`
+
+const HabitCard = styled.div`
+  position: relative;
+  padding: 14px 14px;
+  display: flex;
+  width: 340px;
+  height: 90px;
+  background-color: white;
+  margin-bottom: 30px;
+  border-radius: 6px;
+  
+  ion-icon{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #666666;
+  }
+`
+
+const HabitsInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  h1{
+    font-size: 20px;
+    font-family: 'Lexend Deca';
+    margin-bottom: 8px;
+    color: #666666;
+  }
+`
+
+const WeekButtonList = styled.div`
+  display: flex;
+  flex-direction: row;
+  button{
+    font-family: 'Lexend Deca';
+    width: 30px;
+    height: 30px;
+    margin-right: 6px;
+    border: 1px solid #D5D5D5;
+    background-color: ${props => props.selected ? "#FFFFFF" : "red"};
+    color: #D5D5D5;
+  }
 `

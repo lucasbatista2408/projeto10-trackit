@@ -1,11 +1,16 @@
 import styled from "styled-components"
-import {useState} from "react"
-
-
+import React, { useContext, useState, useEffect } from "react";
+import UserContext from "../contexts/UserContext";
+import axios from "axios"
 
 export default function TodayHabitsCard({setCont, cont}){
+
+  const { info, setInfo } = useContext(UserContext);
   
   const [color, setColor] = useState(false)
+  const [list, setList] = useState([])
+
+  console.log(list)
 
   function HandleCont(e){
     console.log('clicou')
@@ -20,16 +25,42 @@ export default function TodayHabitsCard({setCont, cont}){
       e.target.style.color = '#EBEBEB'
     } 
   }
+
+    // AXIOS REQUEST
+    useEffect(() => {
+      axiosRequest()
+    }, [])
   
+    function axiosRequest(){
+      const token = info.token;
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}` //Padrão da API (Bearer Authentication)
+        }
+      }
+      const promise = axios.get("https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/today", config)
+      promise.then(res => {
+        setList(res.data)
+        console.log(res.data)
+      })
+      promise.catch(err => {
+        console.log(err)
+      })
+    }
+    /////////////////////////////////////////
+  
+
   return(
     <CardBox>
-      <Container>
-        <Text>
-          <h1>Ler 1 Capitulo de livro</h1>
-          <p>Sequência atual: 3 dias <br/> Seu recorde: 5 dias</p>
-        </Text>
-          <ion-icon onClick={HandleCont} name="checkbox"></ion-icon>
-      </Container>
+      {list.map((habit,key) => 
+        <Container>
+          <Text>
+            <h1>{habit.name}</h1>
+            <p>Sequência atual: {habit.currentSequence} dias <br/> Seu recorde: {habit.highestSequence} dias</p>
+          </Text>
+            <ion-icon onClick={(e) => {HandleCont(e)}} name="checkbox"></ion-icon>
+        </Container>
+      )}
     </CardBox>
   )
 }
@@ -40,6 +71,7 @@ const CardBox = styled.div`
   height: 94px;
   background-color: white;
   border-radius: 6px;
+  margin-bottom: 10px;
 `
 
 const Container = styled.div`

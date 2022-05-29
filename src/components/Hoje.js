@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import 'dayjs/locale/pt-br';
 import styled from "styled-components"
 import {useState} from "react"
 
