@@ -23,6 +23,10 @@ export default function HabitFooter(){
     navigate('/hoje')
   }
 
+  function HandleHistory(){
+    navigate('/historico')
+  }
+
   return(
     <Footer>
       <h1 onClick={HandleHabit}>Hábitos</h1>
@@ -40,13 +44,13 @@ export default function HabitFooter(){
               })}
             />
       </ProgressBar>
-      <h1>Histórico</h1>
+      <h1 onClick={HandleHistory}>Histórico</h1>
     </Footer>
   )
 }
 
 const Footer = styled.footer`
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
 

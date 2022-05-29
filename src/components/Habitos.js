@@ -14,17 +14,38 @@ export default function Habitos(){
   const [newHabit, setNewHabbit] = useState('') // CRIAR HABITO NOVO
   const [add, setAdd] = useState(false); // ABRIR TELA DE CRIAÇÃO DE HABITO NOVO
   const [sDay, setSDay] = useState([])
+  const [controlerD, setControlerD] = useState(false)
+  const [controlerA, setControlerA] = useState(false)
 
   const name = newHabit;
   const days = sDay;
   
-  console.log(days)
-  console.log(sDay)
-  console.log(list)
-  console.log(newHabit)
-  console.log(name)
+  // console.log(days)
+  // console.log(sDay)
+  // console.log(list)
+  // console.log(newHabit)
+  // console.log(name)
 
   const buttons = [{name: 'D'}, {name: 'S'}, {name: 'T'},{name: 'Q'}, {name: 'Q'}, {name: 'S'}, {name: 'S'}]
+
+    // AXIOS REQUEST
+    useEffect(() => {
+      axiosRequest()
+    }, [controlerD, controlerA])
+  
+    function axiosRequest(){
+      const token = info.token;
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}` //Padrão da API (Bearer Authentication)
+        }
+      }
+      const promise = axios.get("https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits", config)
+      promise.then(res => {
+        setList(res.data)
+      })
+    }
+    /////////////////////////////////////////
 
   // ABRIR E FECHAR JANELA DE HABITOS
   function HandleAdd(){
@@ -37,28 +58,23 @@ export default function Habitos(){
   ///////////////////////////////////////////////////
 
   // AXIOS POST
-  function HandlePost(){
+  function HandlePost(e){
+    e.preventDefault()
     const token = info.token;
-
     const config = {
       headers: {
         Authorization: `Bearer ${token}` //Padrão da API (Bearer Authentication)
       }
     }
-
     const name = newHabit;
     const days = sDay;
-
     const body ={
       name: name,
       days: days
     }
-
     const promise = axios.post("https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits", body, config)
     promise.then(res => {
-      setList(res.data)
-      console.log(res.data)
-      console.log(list)
+      setControlerA(!controlerA)
     })
   }
   ///////////////////////////////////////////////////
@@ -79,24 +95,27 @@ export default function Habitos(){
   }
   //////////////////////////////////////////////////
 
-  // AXIOS REQUEST
-  useEffect(() => {
-    axiosRequest()
-  }, [])
-
-  function axiosRequest(){
+  function HandleDelete(id){
+    const willDelete = window.confirm("Deseja mesmo deletar?")
+    console.log(id)
     const token = info.token;
     const config = {
       headers: {
         Authorization: `Bearer ${token}` //Padrão da API (Bearer Authentication)
       }
     }
-    const promise = axios.get("https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits", config)
-    promise.then(res => {
-      setList(res.data)
-    })
+    const URL = `https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/${id}`
+    if(willDelete === true){
+      const promise = axios.delete(URL, config)
+      promise.then(res => {
+        setControlerD(!controlerD)
+        console.log("sucesso")
+      })
+      promise.catch(err => {
+        console.log(err)
+      }) 
+    }
   }
-  /////////////////////////////////////////
 
 
   return(
@@ -110,9 +129,9 @@ export default function Habitos(){
           </HabitsHeader>
           {add === false? null : 
               <AddHabit>
-                <input type="text" placeholder={"nome do hábito"} onChange={e => setNewHabbit(e.target.value)} required/>
+                <input type="text" placeholder={"nome do hábito"} onChange={e => setNewHabbit(e.target.value)} value={newHabit} required/>
                 <WeekButton>
-                  {buttons.map((day, index) =><button id={index} onClick={(e) => {HandleActive(e, index)}}>{day.name}</button>)}
+                  {buttons.map((day, index) =><button id={index} onClick={(e) => {HandleActive(e, index)}} value={sDay}>{day.name}</button>)}
                 </WeekButton>
                 <SaveCancel>
                   <Cancel onClick={HandleCancel}>Cancelar</Cancel>
@@ -120,18 +139,18 @@ export default function Habitos(){
                 </SaveCancel>
               </AddHabit>}
             <HabitsList>
-              {(list.length) === 0 ? <h1>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</h1> : list.map((value) => {
+              {(list.length) === 0 ? <h1>Você não tem nenhum hábito cadastrado ainda. Adicione um hábito para começar a trackear!</h1> : list.map((value, key) => {
                 const {id, name, days} = value;
-                console.log(days)
+                const daysList = days
                 return(
-                <HabitCard>
+                <HabitCard key={key}>
                   <HabitsInfo>
                   <h1>{name}</h1>
                     <WeekButtonList>
-                      {buttons.map((day, index) =><button selected={days.some(item => item === index)} key={index} disabled>{day.name}</button>)}
+                      {buttons.map((day, index) => <Button selected={daysList.some(item => item === index)} key={index} disabled>{day.name}</Button>)}
                     </WeekButtonList>
                   </HabitsInfo> 
-                  <ion-icon name="trash-outline"></ion-icon>
+                  <ion-icon onClick={() => HandleDelete(id)} name="trash-outline"></ion-icon>
                 </HabitCard>
                 )})}
             </HabitsList>
@@ -143,14 +162,17 @@ export default function Habitos(){
 } 
 
 const Today = styled.div`
+  position: relative; 
   padding: 28px 16px;
   background-color: #E5E5E5;
   width: 100%;
   height: 100vh;
+  overflow: auto;
 `
 
 const Container = styled.div`
   margin-top: 70px;
+  margin-bottom: 72px;
 `
 
 const Habits = styled.div`
@@ -284,13 +306,17 @@ const HabitsInfo = styled.div`
 const WeekButtonList = styled.div`
   display: flex;
   flex-direction: row;
-  button{
+`
+
+const Button = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-family: 'Lexend Deca';
     width: 30px;
     height: 30px;
     margin-right: 6px;
     border: 1px solid #D5D5D5;
-    background-color: ${props => props.selected ? "#FFFFFF" : "red"};
-    color: #D5D5D5;
-  }
+    background-color: ${props => props.selected ? "#CFCFCF" : "#FFFFFF"};
+    color: ${props => props.selected ? "#FFFFFF" : "#CFCFCF"};;
 `

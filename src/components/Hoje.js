@@ -9,7 +9,7 @@ import TodayHabitsCard from "./TodayHabitsCard"
 
 export default function Hoje(){
 
-  const [cont, setCont] = useState(0)
+  const [cont, setCont] = useState([])
 
 const weekday = dayjs().locale('pt-br').format('dddd');
 const day = dayjs().format('D')
@@ -21,12 +21,8 @@ console.log(dayjs.locale())
     <Today>
       <Header />
       <Container>
-        <TodayHeader>
-          <h1>{weekday}, {day}</h1>
-          {cont === 0 ? <p>Nenhum Habito concluido ainda</p> : <h2> {cont} habitos concluidos </h2>}
-        </TodayHeader>
         <TodayHabits>
-          <TodayHabitsCard cont={cont} setCont={setCont}/>
+          <TodayHabitsCard weekday={weekday} day={day} />
         </TodayHabits>
       </Container>
       <HabitFooter />  
@@ -39,34 +35,12 @@ const Today = styled.div`
   background-color: #E5E5E5;
   width: 100%;
   height: 100vh;
+  overflow: auto;
 `
 
 const Container = styled.div`
   margin-top: 70px;
-`
-
-const TodayHeader = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-bottom: 28px;
-
-  h1{
-    font-family: 'Lexend Deca';
-    color: #126BA5;
-    font-size: 22px;
-    margin-bottom: 4px;
-  }
-  h2{
-    font-family: 'Lexend Deca';
-    font-size: 18px;
-    color: #8FC549;
-  }
-  p{
-    font-family: 'Lexend Deca';
-    font-size: 18px;
-    color: #BABABA;
-  }
+  margin-bottom: 72px;
 `
 
 const TodayHabits = styled.div`
