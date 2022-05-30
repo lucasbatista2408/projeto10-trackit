@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useContext, useState, useEffect } from "react";
 import {useNavigate} from "react-router-dom"
 import styled from "styled-components"
 import {
@@ -7,11 +7,14 @@ import {
   buildStyles
 } from "react-circular-progressbar";
 import 'react-circular-progressbar/dist/styles.css';
+import UserContext from "../contexts/UserContext";
 // Animation
 import { easeQuadInOut } from "d3-ease";
 import AnimatedProgressProvider from "react-animated-progress-bar";
 
 export default function HabitFooter(){
+
+  const { per } = useContext(UserContext);
 
   const navigate = useNavigate()
 
@@ -32,7 +35,7 @@ export default function HabitFooter(){
       <h1 onClick={HandleHabit}>Hábitos</h1>
       <ProgressBar onClick={HandleToday} >
             <CircularProgressbar
-              value={50}
+              value={per}
               text="Hoje"
               background
               backgroundPadding={6}

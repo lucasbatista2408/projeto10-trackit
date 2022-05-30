@@ -28,13 +28,10 @@ export default function Login(){
     promise.then(res => { 
       const dados = res.data;
       setInfo(dados)
-      console.log(res.data)
-      console.log(info)
       navigate('/hoje')}
       )
 
     promise.catch(error => (
-      console.log(error),
       alert("As informações digitadas estão incorretas"),
       setPopup(false),
       window.location.reload(true)
@@ -45,16 +42,23 @@ export default function Login(){
     navigate("/cadastro")
   }
 
-  return( popup === false ?
+  return( 
     <LoginPage>
       <img src={Logo} alt="Logo"/>
+      {popup === false ?
       <Form>
         <input type="text" value={form.email} placeholder='email' onChange={e => setForm({...form, email: e.target.value})} required/>
         <input type="password" value={form.password} placeholder='senha' onChange={e => setForm({...form, password: e.target.value})} required/>
         <button onClick={HandleLogIn} type="submit" >entrar</button>
+      </Form> : 
+      <Form>
+        <input type="text" loading={popup === true} value={form.email} placeholder='email' onChange={e => setForm({...form, email: e.target.value})} disabled required/>
+        <input type="password" loading={popup === true} value={form.password} placeholder='senha' onChange={e => setForm({...form, password: e.target.value})} disabled required/>
+        <PopUpLogin />
       </Form>
+      }
         <Button onClick={HandleClick}>Não tem uma conta? Cadastre-se</Button>
-    </LoginPage> : <PopUpLogin />
+    </LoginPage>
   )
 }
 
@@ -81,6 +85,8 @@ const Form = styled.form`
   align-items: center;
 
   input{
+    outline: none;
+    transition: 0.5s;
     padding-left: 10px;
     border-radius: 4px;
     font-family: 'Lexend Deca', sans-serif;
@@ -94,6 +100,9 @@ const Form = styled.form`
     color: #DBDBDB;
   }
 }
+  input:focus {
+    border: 2px solid #52B6FF;
+  }
 
   button{
     font-size: 22px;
@@ -104,7 +113,7 @@ const Form = styled.form`
     border: none;
     border-radius: 4px;
     background-color: #52B6FF;
-    color: white;
+    color: ${props => props.loading ? "#F2F2F2F" : "#FFFFFF"};
   }
 `
 

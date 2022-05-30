@@ -11,7 +11,9 @@ import Historico from "./components/Historico.js"
 function App(){
 
   const [info, setInfo] = useState({});
-  const contextValue = {info, setInfo}
+  const [per, setPer] = useState('')
+  const contextValue = {info, setInfo, per, setPer}
+
   console.log(info)
 
   return (

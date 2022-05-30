@@ -22,7 +22,7 @@ console.log(dayjs.locale())
       <Header />
       <Container>
         <TodayHabits>
-          <TodayHabitsCard weekday={weekday} day={day} />
+          <TodayHabitsCard/>
         </TodayHabits>
       </Container>
       <HabitFooter />  

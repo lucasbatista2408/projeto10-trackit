@@ -7,26 +7,49 @@ import 'dayjs/locale/pt-br';
 
 export default function TodayHabitsCard(){
 
-  const { info, setInfo } = useContext(UserContext);
+  const { info, per, setPer } = useContext(UserContext);
 
   const weekday = dayjs().locale('pt-br').format('dddd');
   const day = dayjs().format('D')
   
-  const [color, setColor] = useState(false)
   const [list, setList] = useState([])
   const [fin, setFin] = useState([])
+  const [selec, setSelec] = useState([])
+  const [controlerD, setControlerD] = useState(false)
+
 
   console.log(list)
+  console.log(selec)
 
-  function HandleActive(e, index){
+  function HandleActive(e, index, id){
     const array = fin.some((day) => day === index);
+    const URL_CHECK = `https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/${id}/check`
+    const URL_UNCHECK = `https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/${id}/uncheck`
+    const token = info.token;
+    console.log(token)
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}` //Padrão da API (Bearer Authentication)
+      }
+    }
+
     if (!array) {
       e.target.style.color = '#8FC549'
       setFin([...fin, index]);
+      const promise = axios.post(URL_CHECK, null, config)
+      promise.then(res => {
+        console.log("deu bom") //APAGAR DEPOIS
+        setControlerD(!controlerD)
+      })
     } else {
       const arrayN = fin.filter((day) => day !== index);
       e.target.style.color = '#EBEBEB'
       setFin(arrayN);
+      const promise = axios.post(URL_UNCHECK, null, config)
+      promise.then(res => {
+        console.log("deu bom desmarcar")
+        setControlerD(!controlerD) //APAGAR DEPOIS
+      })
     }
   }
 
@@ -34,7 +57,7 @@ export default function TodayHabitsCard(){
     // AXIOS REQUEST
     useEffect(() => {
       axiosRequest()
-    }, [])
+      }, [controlerD])
   
     function axiosRequest(){
       const token = info.token;
@@ -45,8 +68,22 @@ export default function TodayHabitsCard(){
       }
       const promise = axios.get("https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits/today", config)
       promise.then(res => {
+        let cont = 0;
         setList(res.data)
         console.log(res.data)
+        res.data.map( habit => {
+          const { done } = habit;
+          console.log(done)
+          if(done){
+            cont++
+          }
+        })
+        if(cont !== 0) {
+          setPer(cont*100/res.data.length);
+         }else{
+          setPer(0)
+         }
+         return(true) 
       })
       promise.catch(err => {
         console.log(err)
@@ -59,7 +96,7 @@ export default function TodayHabitsCard(){
     <>
       <TodayHeader>
         <h1>{weekday}, {day}</h1>
-        {(fin.length) === 0 ? <p>Nenhum Habito concluido ainda</p> : <h2> {fin.length} habitos concluidos </h2>}
+        {(per === 0) ? <p>Nenhum Habito concluido ainda</p> : <h2> {per}% habitos concluidos </h2>}
        </TodayHeader>
       {list.map((habit,key) =>
         <CardBox>
@@ -68,7 +105,9 @@ export default function TodayHabitsCard(){
                 <h1>{habit.name}</h1>
                 <p>Sequência atual: {habit.currentSequence} dias <br/> Seu recorde: {habit.highestSequence} dias</p>
               </Text>
-                <ion-icon onClick={(e) => {HandleActive(e, habit.name)}} name="checkbox"></ion-icon>
+              <Button selected={habit.done} setSelec={habit.done}>
+                <ion-icon  onClick={(e) => {HandleActive(e, habit.name, habit.id)}} name="checkbox"></ion-icon>
+              </Button>
             </Container>
         </CardBox>)}
     </>
@@ -112,14 +151,7 @@ const Container = styled.div`
   display: flex;
   justify-content: space-between;
 
-  ion-icon{
-    position: absolute;
-    right: 4px;
-    top: 10px;
-    width: 70px;
-    height: 70px;
-    color: #EBEBEB;
-  }
+
 `
 
 const Text = styled.div`
@@ -134,6 +166,17 @@ const Text = styled.div`
   p{
     font-size: 12px;
     line-height: 16px;
-    color: #666666;
+    color:#666666;
+  }
+`
+
+const Button = styled.div`
+    ion-icon{
+    position: absolute;
+    right: 4px;
+    top: 10px;
+    width: 70px;
+    height: 70px;
+    fill: ${props => props.selected ? "#8FC549": "#EBEBEB"}; 
   }
 `

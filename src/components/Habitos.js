@@ -5,10 +5,11 @@ import React, { useContext, useState, useEffect } from "react";
 import UserContext from "../contexts/UserContext";
 import axios from "axios"
 import TodayHabitsCard from "./TodayHabitsCard.js";
+import {ThreeDots} from 'react-loader-spinner'
 
 export default function Habitos(){
   
-  const { info, setInfo } = useContext(UserContext);
+  const { info } = useContext(UserContext);
 
   const [list, setList] = useState([])
   const [newHabit, setNewHabbit] = useState('') // CRIAR HABITO NOVO
@@ -16,6 +17,7 @@ export default function Habitos(){
   const [sDay, setSDay] = useState([])
   const [controlerD, setControlerD] = useState(false)
   const [controlerA, setControlerA] = useState(false)
+  const [post, setPost] = useState(false) // VIRA TRUE QUANDO HÁ UM POST NO HABITO, EXIBINDO O LOADER
 
   const name = newHabit;
   const days = sDay;
@@ -60,6 +62,7 @@ export default function Habitos(){
   // AXIOS POST
   function HandlePost(e){
     e.preventDefault()
+    setPost(true)
     const token = info.token;
     const config = {
       headers: {
@@ -74,7 +77,12 @@ export default function Habitos(){
     }
     const promise = axios.post("https://mock-api.bootcamp.respondeai.com.br/api/v2/trackit/habits", body, config)
     promise.then(res => {
+      setPost(false)
       setControlerA(!controlerA)
+    })
+    promise.catch(err =>{
+      setPost(false)
+      alert('Houve um problema, tente novamente')
     })
   }
   ///////////////////////////////////////////////////
@@ -135,7 +143,16 @@ export default function Habitos(){
                 </WeekButton>
                 <SaveCancel>
                   <Cancel onClick={HandleCancel}>Cancelar</Cancel>
-                  <Save onClick={HandlePost}>Salvar</Save>
+                  {post === false ? <Save onClick={HandlePost}>Salvar</Save> : 
+                  <Loader> 
+                    <ThreeDots 
+                      height="30"
+                      width="50"
+                      color='#FFFFFF'
+                      ariaLabel='loading'
+                    /> 
+                  </Loader>}
+                  
                 </SaveCancel>
               </AddHabit>}
             <HabitsList>
@@ -216,6 +233,7 @@ const AddHabit = styled.div`
   input{
     font-family: 'Lexend Deca';
     border: 1px solid #DBDBDB;
+    border-radius: 6px;
     padding: 10px 10px;
     font-size: 20px;
     width: 302px;
@@ -236,11 +254,14 @@ const WeekButton = styled.div`
     margin-right: 6px;
     border: 1px solid #D5D5D5;
     background-color: transparent;
+    border-radius: 6px;
     color: #D4D4D4;
   }
 `
 
 const SaveCancel = styled.div`
+  display: flex;
+  flex-direction: row;
   position: absolute;
   bottom: 18px;
   right: 20px;
@@ -256,6 +277,23 @@ const Cancel = styled.button`
 `
 
 const Save = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Lexend Deca';
+  font-size: 16px;
+  border:none;
+  border-radius: 4px;
+  width: 84px;
+  height: 36px;
+  margin-left: 24px;
+  background-color: #52B6FF;
+  color: white;
+`
+const Loader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: 'Lexend Deca';
   font-size: 16px;
   border:none;
@@ -317,6 +355,7 @@ const Button = styled.div`
     height: 30px;
     margin-right: 6px;
     border: 1px solid #D5D5D5;
+    border-radius: 6px;
     background-color: ${props => props.selected ? "#CFCFCF" : "#FFFFFF"};
     color: ${props => props.selected ? "#FFFFFF" : "#CFCFCF"};;
 `

@@ -3,7 +3,7 @@ import Logo from "../assets/Group 8.png"
 import {useNavigate} from "react-router-dom"
 import React, {useState} from "react"
 import axios from "axios"
-import PopUp from "./PopUp.js"
+import PopUpLogin from "./PopUpLogin.js"
 
 function Cadastro(){
 
@@ -42,20 +42,27 @@ function Cadastro(){
     navigate('/')
   }
 
-  return  ( popup === false ?
+  return  (
   <SignIn>
     <img src={Logo} alt="Logo"/>
+    {popup === false ?
     <Form>
       <input type="text" placeholder="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
-      <input type="text" placeholder="senha" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required/>
+      <input type="password" placeholder="senha" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required/>
       <input type="text" placeholder="nome"  value={form.name} onChange={e => setForm({...form, name: e.target.value})} required/>
       <input type="text" placeholder="foto"  value={form.image} onChange={e => setForm({...form, image: e.target.value})} required/>
       <button onClick={SignUp}>Cadastrar</button>
+    </Form> : 
+    <Form>
+      <input type="text" placeholder="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+      <input type="password" placeholder="senha" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required/>
+      <input type="text" placeholder="nome"  value={form.name} onChange={e => setForm({...form, name: e.target.value})} required/>
+      <input type="text" placeholder="foto"  value={form.image} onChange={e => setForm({...form, image: e.target.value})} required/>
+      <PopUpLogin/>
     </Form>
+    }
     <Button onClick={HandleLogIn}>Não tem uma conta? Cadastre-se</Button>
 </SignIn>
-  :
-  <PopUp />
   )
 }
 
